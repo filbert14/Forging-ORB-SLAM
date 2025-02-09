@@ -1,6 +1,29 @@
-class Initializer:
-    def __init__(self):
-        pass
+import cv2
+import numpy as np
 
-    def Initialize(self, matches):
-        pass
+# @TODO:
+# - [ ] Use normalized DLT with RANSAC to estimate homography
+# - [ ] Use normalized 8-point algorithm with RANSAC to estimate fundamental matrix
+
+class Initializer:
+    def __init__(self, iterations):
+        self.iterations = iterations
+
+    def Initialize(self, initial_frame, current_frame, matches):
+        # Part 1: Computation of two models
+
+        # initial_frame : query : src : 1
+        # current_frame : train : dst : 2
+        pts1 = []
+        pts2 = []
+        for match in matches:
+            pts1.append(initial_frame.keypoints[match.queryIdx].pt)
+            pts2.append(current_frame.keypoints[match.trainIdx].pt)
+        pts1 = np.float32(pts1)
+        pts2 = np.float32(pts2)
+
+        # Compute a homography
+        H = cv2.findHomography(pts1, pts2, cv2.RANSAC, maxIters=self.iterations)
+
+        # Compute a fundamental matrix
+        F = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC, maxIters=self.iterations)
