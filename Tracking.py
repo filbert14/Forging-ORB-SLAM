@@ -20,9 +20,6 @@ class Tracking:
 
         self.current_frame = None
         self.initial_frame = None
-        self.last_frame    = None
-
-        self.prev_matched  = None
 
         # ORB
         nfeatures     = self.settings["ORBextractor.nFeatures"]
@@ -42,9 +39,6 @@ class Tracking:
     def FirstInitialization(self):
         if self.current_frame.N > 100:
             self.initial_frame = Frame(self.current_frame.image, self.current_frame.keypoints, self.current_frame.descriptors)
-            self.last_frame    = Frame(self.current_frame.image, self.current_frame.keypoints, self.current_frame.descriptors)
-            self.prev_matched  = [Frame.CopyKeyPoint(keypoint) for keypoint in self.current_frame.keypoints]
-
             self.state = State.INITIALIZING
 
     def GrabImage(self):
