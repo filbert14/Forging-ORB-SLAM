@@ -3,6 +3,8 @@ from enum import Enum
 import cv2
 
 from Frame import Frame
+from Matcher import Matcher
+from Initializer import Initializer
 
 class State(Enum):
     NO_IMAGES_YET   = 0
@@ -41,6 +43,21 @@ class Tracking:
             self.initial_frame = Frame(self.current_frame.image, self.current_frame.keypoints, self.current_frame.descriptors)
             self.state = State.INITIALIZING
 
+    def Initialize(self):
+        if self.current_frame.N <= 100:
+            self.state = State.NOT_INITIALIZED
+            return
+
+        matcher = Matcher()
+        matches = matcher.SearchForInitialization(self.initial_frame, self.current_frame)
+
+        if len(matches) < 100:
+            self.state = State.NOT_INITIALIZED
+            return
+
+        initializer = Initializer()
+        initializer.Initialize(matches)
+
     def GrabImage(self):
         # Acquire next image
         image         = self.images[self.img_idx]
@@ -55,3 +72,6 @@ class Tracking:
 
         if self.state == State.NOT_INITIALIZED:
             self.FirstInitialization()
+
+        elif self.state == State.INITIALIZING:
+            self.Initialize()
