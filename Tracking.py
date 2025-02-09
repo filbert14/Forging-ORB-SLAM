@@ -18,12 +18,14 @@ class Tracking:
         self.img_idx  = 0
         self.state    = State.NO_IMAGES_YET
 
+        self.currentFrame = None
+
         # ORB
-        nfeatures     = settings["ORBextractor.nFeatures"]
-        scaleFactor   = settings["ORBextractor.scaleFactor"]
-        nlevels       = settings["ORBextractor.nLevels"]
-        fastThreshold = settings["ORBextractor.fastTh"]
-        scoreType     = settings["ORBextractor.nScoreType"]
+        nfeatures     = self.settings["ORBextractor.nFeatures"]
+        scaleFactor   = self.settings["ORBextractor.scaleFactor"]
+        nlevels       = self.settings["ORBextractor.nLevels"]
+        fastThreshold = self.settings["ORBextractor.fastTh"]
+        scoreType     = self.settings["ORBextractor.nScoreType"]
 
         self.orb = cv2.ORB_create(
             nfeatures     = nfeatures,
