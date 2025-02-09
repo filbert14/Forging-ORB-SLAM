@@ -2,6 +2,8 @@ from enum import Enum
 
 import cv2
 
+from Frame import Frame
+
 class State(Enum):
     NO_IMAGES_YET   = 0
     NOT_INITIALIZED = 1
@@ -38,6 +40,10 @@ class Tracking:
         # Acquire next image
         image         = self.images[self.img_idx]
         self.img_idx += 1
+
+        # Compute keypoints and descriptors for the current frame
+        keypoints, descriptors = self.orb.detectAndCompute(image, None)
+        self.currentFrame      = Frame(image, keypoints, descriptors)
 
         if self.state == State.NO_IMAGES_YET:
             self.state = State.NOT_INITIALIZED
