@@ -27,10 +27,3 @@ class Tracking:
 
         if self.state == State.NOT_INITIALIZED:
             self.FirstInitialization()
-
-def main():
-    tracking = Tracking([1, 2, 3, 4, 5])
-    tracking.GrabImage()
-
-if __name__ == "__main__":
-    main()
