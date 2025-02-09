@@ -19,9 +19,3 @@ class EDSLoader:
         self.images = []
         for image_file in tqdm(image_files, desc="Loading images"):
             self.images.append(cv2.imread(os.path.join(images_path, image_file), cv2.IMREAD_GRAYSCALE))
-
-def main():
-    EDSLoader("EDS", "09_ziggy_flying_pieces")
-
-if __name__ == "__main__":
-    main()
