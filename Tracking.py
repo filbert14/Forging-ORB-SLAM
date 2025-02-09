@@ -18,7 +18,11 @@ class Tracking:
         self.img_idx  = 0
         self.state    = State.NO_IMAGES_YET
 
-        self.currentFrame = None
+        self.current_frame = None
+        self.initial_frame = None
+        self.last_frame    = None
+
+        self.prev_matched  = None
 
         # ORB
         nfeatures     = self.settings["ORBextractor.nFeatures"]
@@ -36,7 +40,12 @@ class Tracking:
         )
 
     def FirstInitialization(self):
-        print("Hello world!")
+        if self.current_frame.N > 100:
+            self.initial_frame = Frame(self.current_frame.image, self.current_frame.keypoints, self.current_frame.descriptors)
+            self.last_frame    = Frame(self.current_frame.image, self.current_frame.keypoints, self.current_frame.descriptors)
+            self.prev_matched  = [Frame.CopyKeyPoint(keypoint) for keypoint in self.current_frame.keypoints]
+
+            self.state = State.INITIALIZING
 
     def GrabImage(self):
         # Acquire next image
@@ -45,7 +54,7 @@ class Tracking:
 
         # Compute keypoints and descriptors for the current frame
         keypoints, descriptors = self.orb.detectAndCompute(image, None)
-        self.currentFrame      = Frame(image, keypoints, descriptors)
+        self.current_frame     = Frame(image, keypoints, descriptors)
 
         if self.state == State.NO_IMAGES_YET:
             self.state = State.NOT_INITIALIZED
