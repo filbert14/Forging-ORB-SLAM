@@ -42,7 +42,6 @@ class Visualizer:
                     spriterenderer = factory.create_sprite_render_system(window)
                     spriterenderer.render(sprite)
 
-                    # Handle events
                     events = sdl2.ext.get_events()
                     for event in events:
                         if event.type == sdl2.SDL_QUIT:
