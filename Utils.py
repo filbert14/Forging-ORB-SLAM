@@ -73,6 +73,13 @@ class Utils:
         return np.asarray(pts_euc)
 
     @staticmethod
+    def ToEuclidean3D(pts):
+        # pts is an np.array of shape (N, 4)
+        pts_euc = np.asarray([np.array(point[:-1] / point[-1]) for point in pts])
+        print(pts_euc.shape)
+        return pts_euc
+
+    @staticmethod
     def ApplyHomography2D(pts, H):
         # pts is an np.array of shape (N, 2)
         # H is a 2D homography of shape (3, 3)
@@ -207,7 +214,35 @@ class Utils:
         return Rs, ts
 
     @staticmethod
-    def ReconstructWithF(K, F):
+    def CheckRT(K, R, t, pts1, pts2, inlier):
+        # Construct projection matrix (initial frame) P1 = K[I | 0]
+        P1 = np.hstack((K, np.zeros([3, 1])))
+
+        # Construct projection matrix (current frame) P2 = K[R | t]
+        t = t[:, np.newaxis]
+        Rt = np.hstack((R, t))
+        P2 = K @ Rt
+
+        # Triangulate 3D points
+        pts3D = cv2.triangulatePoints(P1, P2, np.float32(pts1.T), np.float32(pts2.T))
+        pts3D = pts3D.T
+        pts3D = Utils.ToEuclidean3D(pts3D)
+
+        # We go over matches
+        N = inlier.shape[0]
+        for i in range(N):
+            # If the point correspondence is not an inlier, we ignore it
+            if not inlier[i]:
+                continue
+
+        # - . . .
+        # - Parallax check
+        # - Depth check (both cameras)
+        # - Reprojection error check (both cameras)
+        # - Store 3D points
+
+    @staticmethod
+    def ReconstructWithF(K, F, pts1, pts2, inlier):
         # Compute essential matrix
         E = K.T @ F @ K
 
@@ -215,3 +250,4 @@ class Utils:
         Rs, ts = Utils.DecomposeEssentialMatrix(E)
 
         # Reconstruct with all four hypotheses
+        Utils.CheckRT(K, Rs[0], ts[0], pts1, pts2, inlier)
