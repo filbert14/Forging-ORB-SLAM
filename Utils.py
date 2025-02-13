@@ -139,7 +139,7 @@ class Utils:
         return score, inlier
 
     @staticmethod
-    def EstimateFundamentalMatrixRANSAC(pts1, pts2, iterations, sigma):
+    def EstimateFundamentalMatrixRANSAC(pts1, pts2, iterations, sigma, debug=False):
         N = pts1.shape[0]
         indices_all = range(N)
 
@@ -147,7 +147,7 @@ class Utils:
         best_score = float('-inf')
         best_inlier = None
 
-        for _ in range(iterations):
+        for i in range(iterations):
             indices = random.sample(indices_all, 8)
             pts1_min_subset = pts1[indices]
             pts2_min_subset = pts2[indices]
@@ -159,5 +159,10 @@ class Utils:
                 best_F = F
                 best_score = score
                 best_inlier = inlier
+
+            if debug:
+                curr_num_inliers = int(inlier[inlier == 1].sum())
+                best_num_inliers = int(best_inlier[best_inlier == 1].sum())
+                print(f"iteration: {i + 1:03d} -- best_score: {best_score:.3f} -- num_inliers: {best_num_inliers:03d} -- score: {score:.3f} -- num_inliers: {curr_num_inliers:03d}")
 
         return best_F, best_score, best_inlier
