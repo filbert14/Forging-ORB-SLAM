@@ -8,13 +8,16 @@ from Utils import *
 # - [ x ] Use normalized 8-point algorithm with RANSAC to estimate fundamental matrix
 
 # Checklist
-# - [ ] Initially, we just assume a non-planar scene and just use a fundamental matrix
+# - [ x ] Initially, we just assume a non-planar scene and just use a fundamental matrix
 #   - [ x ] Fundamental matrix estimation
 #   - [ x ] Symmetric transfer error
 #   - [ x ] RANSAC estimation scheme
-#   - [ ] Motion and structure reconstruction
-# - [ ] Then, implement pose estimation
-# - [ ] Then, implement bundle adjustment
+#
+# - [ ] Afterwards, work on pose estimation and triangulation
+#   - [ ] Estimate the four motion hypotheses
+#   - [ ] ...
+#
+# - [ ] Finally, implement bundle adjustment with g2o-python
 
 class Initializer:
     def __init__(self, sigma, iterations):

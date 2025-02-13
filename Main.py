@@ -9,6 +9,8 @@ def main():
 
     edsloader = EDSLoader("EDS", "09_ziggy_flying_pieces")
     tracking  = Tracking(edsloader.images, settings)
+
+    tracking.GrabImage()
     tracking.GrabImage()
 
 if __name__ == "__main__":
