@@ -38,4 +38,6 @@ class Initializer:
         pts1 = np.float32(pts1)
         pts2 = np.float32(pts2)
 
-        F = Utils.EstimateFundamentalMatrix(pts1, pts2)
+        # Compute fundamental matrix via normalized 8-point algorithm and RANSAC
+        F, score, inlier = Utils.EstimateFundamentalMatrixRANSAC(pts1, pts2, self.iterations, self.sigma, debug=True)
+        Utils.ReconstructWithF(initial_frame.K, F)

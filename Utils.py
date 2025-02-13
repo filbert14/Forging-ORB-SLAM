@@ -166,3 +166,52 @@ class Utils:
                 print(f"iteration: {i + 1:03d} -- best_score: {best_score:.3f} -- num_inliers: {best_num_inliers:03d} -- score: {score:.3f} -- num_inliers: {curr_num_inliers:03d}")
 
         return best_F, best_score, best_inlier
+
+    @staticmethod
+    def DecomposeEssentialMatrix(E):
+        # Decompose E using SVD
+        U, S, VT = np.linalg.svd(E, full_matrices=True)
+
+        # Ensure that U, V are valid rotations
+        if np.linalg.det(U) < 0:
+            U *= -1
+            S *= -1
+
+        if np.linalg.det(VT) < 0:
+            VT *= -1
+            S *= -1
+
+        # Determine four different combinations of R and t
+        W = np.zeros((3, 3))
+        W[0, 1] = -1
+        W[1, 0] = 1
+        W[2, 2] = 1
+
+        Rs = []
+        ts = []
+
+        t = U[:, 2]
+
+        Rs.append(U @ W @ VT)
+        ts.append(t)
+
+        Rs.append(U @ W.T @ VT)
+        ts.append(t)
+
+        Rs.append(U @ W @ VT)
+        ts.append(-t)
+
+        Rs.append(U @ W.T @ VT)
+        ts.append(-t)
+
+        return Rs, ts
+
+    @staticmethod
+    def ReconstructWithF(K, F):
+        # Compute essential matrix
+        E = K.T @ F @ K
+
+        # Decompose essential matrix
+        Rs, ts = Utils.DecomposeEssentialMatrix(E)
+
+        # Reconstruct with all four hypotheses
