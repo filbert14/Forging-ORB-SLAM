@@ -1,7 +1,27 @@
 import cv2
 import numpy as np
 
+"""
+# Some notes on the chi-squared test:
+
+- If a random variable Z follows the standard normal distribution, then Z^2 has the chi^2 distribution with one degree of freedom (DOF)
+- If Z1, Z2, ..., Zk are independent standard normal random variables, then Z1^2 + ... + Zk^2 has the chi^2 distribution with K DOFs
+- We assume that the reprojection error is a random variable which has the normal distribution with mu = 0 and std = 1 (in pixels)
+
+- If we normalize by std and square afterwards, we get a quantity which has a chi^2 distribution (with 1 DOF)
+- Given the DOF, we can look at a chi-square distribution table for the significance level that we want
+- For 1 DOF and a significance level of 0.05 ^= 5%, we can extract the critical value 3.841
+
+- This means that the probability of the quantity taking a value between 0 and 3.841 is 95%
+- Conversely, the probability of the quantity taking a value bigger than 3.841 is 0.05 ^= 5%
+- Intuitively, we then consider the point an outlier if the corresponding quantity takes on a value bigger than 3.841,
+  since the probability of its occurrence is only 0.05 ^= 5%
+"""
+
 class Utils:
+    sig51DOF = 3.841
+    sig52DOF = 5.991
+
     @staticmethod
     # pts is an np.array of shape (N, 2)
     def GetCondition2D(pts):
@@ -72,3 +92,44 @@ class Utils:
         F_decond = T2.T @ F @ T1
 
         return F_decond/F_decond[2, 2]
+
+    @staticmethod
+    def ComputeScoreFundamental(F, pts1, pts2, sigma):
+        N = pts1.shape[0]
+
+        pts1_hom = Utils.ToHomogeneous(pts1)
+        pts2_hom = Utils.ToHomogeneous(pts2)
+
+        # Assume all correspondences are inliers
+        score  = 0
+        inlier = np.ones(N)
+
+        for i in range(N):
+            point1_hom = pts1_hom[i]
+            point2_hom = pts2_hom[i]
+
+            # Compute reprojection error in the second image
+            line2 = F @ point1_hom
+            a2, b2, c2 = line2[0], line2[1], line2[2]
+            
+            dist2 = np.dot(point2_hom, line2) / np.linalg.norm(np.array([a2, b2]))
+
+            # Compute reprojection error in the first image
+            line1 = F.T @ point2_hom
+            a1, b1, c1 = line1[0], line1[1], line1[2]
+            
+            dist1 = np.dot(point1_hom, line1) / np.linalg.norm(np.array([a1, b1]))
+
+            # Compute score
+            chiSquare1 = (dist1/sigma) ** 2
+            chiSquare2 = (dist2/sigma) ** 2
+
+            if chiSquare1 > Utils.sig51DOF:
+                inlier[i] = False
+                score += Utils.sig52DOF - chiSquare1
+
+            if chiSquare2 > Utils.sig51DOF:
+                inlier[i] = False
+                score += Utils.sig52DOF - chiSquare2
+
+        return score, inlier
