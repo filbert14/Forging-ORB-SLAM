@@ -197,8 +197,8 @@ class Utils:
         return Rs, ts
 
     @staticmethod
-    def triangulatePoints(P1, P2, pts1, pts2):
-        def triangulatePoint(P1, P2, point1, point2):
+    def TriangulatePoints(P1, P2, pts1, pts2):
+        def TriangulatePoint(P1, P2, point1, point2):
             # Constraints for point1
             x1, y1 = point1[0], point1[1]
             C1 = x1 * P1[2, :] - P1[0, :]
@@ -217,7 +217,7 @@ class Utils:
             return VT[-1, :]
 
         N = pts1.shape[0]
-        pts3D = np.array([triangulatePoint(P1, P2, pts1[i], pts2[i]) for i in range(N)])
+        pts3D = np.array([TriangulatePoint(P1, P2, pts1[i], pts2[i]) for i in range(N)])
 
         return pts3D
 
@@ -232,8 +232,7 @@ class Utils:
         P2 = K @ Rt
 
         # Triangulate 3D points
-        pts3D = cv2.triangulatePoints(P1, P2, np.float32(pts1.T), np.float32(pts2.T))
-        pts3D = Utils.ToEuclidean(pts3D.T)
+        pts3D = Utils.ToEuclidean(Utils.TriangulatePoints(P1, P2, pts1, pts2))
 
         # We go over matches
         N = inlier.shape[0]
