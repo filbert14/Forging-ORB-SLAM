@@ -68,6 +68,6 @@ class Utils:
         pts1_cond = Utils.ApplyHomography2D(pts1, T1)
         pts2_cond = Utils.ApplyHomography2D(pts2, T2)
 
-        F = cv2.findFundamentalMat(pts1_cond, pts2_cond, cv2.FM_8POINT)
+        F, _ = cv2.findFundamentalMat(pts1_cond, pts2_cond, cv2.FM_8POINT)
 
         return T2.T @ F @ T1
