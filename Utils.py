@@ -1,3 +1,5 @@
+import random
+
 import cv2
 import numpy as np
 
@@ -135,3 +137,27 @@ class Utils:
                 score += Utils.sig52DOF - chi_square_2
 
         return score, inlier
+
+    @staticmethod
+    def EstimateFundamentalMatrixRANSAC(pts1, pts2, iterations, sigma):
+        N           = pts1.shape[0]
+        indices_all = range(N)
+
+        best_F      = None
+        best_score  = float('-inf')
+        best_inlier = None
+
+        for _ in range(iterations):
+            indices         = random.sample(indices_all, 8)
+            pts1_min_subset = pts1[indices]
+            pts2_min_subset = pts2[indices]
+
+            F             = Utils.EstimateFundamentalMatrix(pts1_min_subset, pts2_min_subset)
+            score, inlier = Utils.ComputeScoreFundamental(F, pts1, pts2, sigma)
+
+            if score > best_score:
+                best_F      = F
+                best_score  = score
+                best_inlier = inlier
+
+        return best_F, best_score, best_inlier
