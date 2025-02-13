@@ -8,7 +8,7 @@ def main():
         settings = yaml.safe_load(file)
 
     edsloader = EDSLoader("EDS", "09_ziggy_flying_pieces")
-    tracking  = Tracking(edsloader.images, settings)
+    tracking  = Tracking(edsloader.images, edsloader.K, settings)
 
     tracking.GrabImage()
     tracking.GrabImage()

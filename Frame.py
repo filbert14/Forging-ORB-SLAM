@@ -1,7 +1,7 @@
 import cv2
 
 class Frame:
-    def __init__(self, image, keypoints, descriptors):
+    def __init__(self, image, keypoints, descriptors, K):
         # Original image
         self.image       = image.copy()
 
@@ -13,6 +13,9 @@ class Frame:
 
         # Number of keypoints
         self.N           = len(keypoints)
+
+        # Calibration matrix
+        self.K           = K.copy()
 
     @staticmethod
     def CopyKeyPoint(keypoint):
