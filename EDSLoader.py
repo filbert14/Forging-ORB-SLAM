@@ -9,6 +9,11 @@ class EDSLoader:
 
     FPS = 75
 
+    # Calibration matrix
+    K = np.array([[766.536025127154, 0                , 291.0503512057777],
+                  [0               , 767.5749459126396, 227.4060484950132],
+                  [0               , 0                , 1               ]])
+
     def __init__(self, dataset, sequence, fps=30):
         self.dataset  = dataset
         self.sequence = sequence
