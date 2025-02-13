@@ -2,12 +2,17 @@ import os
 import sys
 
 import cv2
+import numpy as np
 from tqdm import tqdm
 
 class EDSLoader:
-    def __init__(self, dataset, sequence):
+
+    FPS = 75
+
+    def __init__(self, dataset, sequence, fps=30):
         self.dataset  = dataset
         self.sequence = sequence
+        self.fps      = fps
         self.images   = []
 
         # Load images
@@ -17,6 +22,9 @@ class EDSLoader:
                        image_file in
                        sorted(os.listdir(images_path)) if
                        not image_file == "timestamps.txt"]
+
+        step = int(np.ceil(EDSLoader.FPS / self.fps))
+        image_files = image_files[::step]
 
         for image_file in tqdm(image_files, desc="Loading images"):
             self.images.append(cv2.imread(os.path.join(images_path, image_file), cv2.IMREAD_GRAYSCALE))
