@@ -7,6 +7,10 @@ import numpy as np
 
 # Checklist
 # - [ ] Initially, we just assume a non-planar scene and just use a fundamental matrix
+#   - [ ] Fundamental matrix estimation
+#   - [ ] Symmetric transfer error
+#   - [ ] RANSAC estimation scheme
+#   - [ ] Motion and structure reconstruction
 # - [ ] Then, implement pose estimation
 # - [ ] Then, implement bundle adjustment
 
