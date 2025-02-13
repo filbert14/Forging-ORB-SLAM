@@ -121,15 +121,17 @@ class Utils:
             dist1 = np.dot(point1_hom, line1) / np.linalg.norm(np.array([a1, b1]))
 
             # Compute score
-            chiSquare1 = (dist1/sigma) ** 2
-            chiSquare2 = (dist2/sigma) ** 2
+            chi_square_1 = (dist1/sigma) ** 2
+            chi_square_2 = (dist2/sigma) ** 2
 
-            if chiSquare1 > Utils.sig51DOF:
+            if chi_square_1 > Utils.sig51DOF:
                 inlier[i] = False
-                score += Utils.sig52DOF - chiSquare1
+            else:
+                score += Utils.sig52DOF - chi_square_1
 
-            if chiSquare2 > Utils.sig51DOF:
+            if chi_square_2 > Utils.sig51DOF:
                 inlier[i] = False
-                score += Utils.sig52DOF - chiSquare2
+            else:
+                score += Utils.sig52DOF - chi_square_2
 
         return score, inlier
