@@ -59,25 +59,8 @@ class Utils:
 
     @staticmethod
     def ToEuclidean(pts):
-        # pts is an np.array of shape (N, 3)
-        pts_euc = []
-
-        for point in pts:
-            x, y, w = point[0], point[1], point[2]
-
-            x_norm = x/w
-            y_norm = y/w
-
-            pts_euc.append(np.array([x_norm, y_norm]))
-
-        return np.asarray(pts_euc)
-
-    @staticmethod
-    def ToEuclidean3D(pts):
-        # pts is an np.array of shape (N, 4)
-        pts_euc = np.asarray([np.array(point[:-1] / point[-1]) for point in pts])
-        print(pts_euc.shape)
-        return pts_euc
+        # pts is an np.array of shape (N, D)
+        return np.asarray([np.array(point[:-1] / point[-1]) for point in pts])
 
     @staticmethod
     def ApplyHomography2D(pts, H):
@@ -225,8 +208,7 @@ class Utils:
 
         # Triangulate 3D points
         pts3D = cv2.triangulatePoints(P1, P2, np.float32(pts1.T), np.float32(pts2.T))
-        pts3D = pts3D.T
-        pts3D = Utils.ToEuclidean3D(pts3D)
+        pts3D = Utils.ToEuclidean(pts3D.T)
 
         # We go over matches
         N = inlier.shape[0]
