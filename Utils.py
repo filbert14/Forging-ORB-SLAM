@@ -197,6 +197,31 @@ class Utils:
         return Rs, ts
 
     @staticmethod
+    def triangulatePoints(P1, P2, pts1, pts2):
+        def triangulatePoint(P1, P2, point1, point2):
+            # Constraints for point1
+            x1, y1 = point1[0], point1[1]
+            C1 = x1 * P1[2, :] - P1[0, :]
+            C2 = y1 * P1[2, :] - P1[1, :]
+
+            # Constraints for point2
+            x2, y2 = point2[0], point2[1]
+            C3 = x2 * P2[2, :] - P2[0, :]
+            C4 = y2 * P2[2, :] - P2[1, :]
+
+            # Create design matrix
+            A = np.vstack((C1, C2, C3, C4))
+
+            # Return minimizing right singular vector
+            U, S, VT = np.linalg.svd(A, full_matrices=True)
+            return VT[-1, :]
+
+        N = pts1.shape[0]
+        pts3D = np.array([triangulatePoint(P1, P2, pts1[i], pts2[i]) for i in range(N)])
+
+        return pts3D
+
+    @staticmethod
     def CheckRT(K, R, t, pts1, pts2, inlier):
         # Construct projection matrix (initial frame) P1 = K[I | 0]
         P1 = np.hstack((K, np.zeros([3, 1])))
