@@ -5,12 +5,17 @@ import numpy as np
 # - [ ] Use normalized DLT with RANSAC to estimate homography
 # - [ ] Use normalized 8-point algorithm with RANSAC to estimate fundamental matrix
 
+# Checklist
+# - [ ] Initially, we just assume a non-planar scene and just use a fundamental matrix
+# - [ ] Then, implement pose estimation
+# - [ ] Then, implement bundle adjustment
+
 class Initializer:
     def __init__(self, iterations):
         self.iterations = iterations
 
     def Initialize(self, initial_frame, current_frame, matches):
-        # Part 1: Computation of two models
+        # Part 1: Computation of (one) two models
 
         # initial_frame : query : src : 1
         # current_frame : train : dst : 2
