@@ -55,7 +55,7 @@ class Tracking:
             self.state = State.NOT_INITIALIZED
             return
 
-        initializer = Initializer(200)
+        initializer = Initializer(1.0, 200)
         initializer.Initialize(self.initial_frame, self.current_frame, matches)
 
     def GrabImage(self):
