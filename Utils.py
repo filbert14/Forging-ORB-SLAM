@@ -1,4 +1,5 @@
 import random
+import math
 
 import cv2
 import numpy as np
@@ -222,7 +223,7 @@ class Utils:
         return pts3D
 
     @staticmethod
-    def CheckRT(K, R, t, pts1, pts2, inlier):
+    def CheckRT(K, R, t, pts1, pts2, inlier, sigma):
         # Construct projection matrix (initial frame) P1 = K[I | 0]
         P1 = np.hstack((K, np.zeros([3, 1])))
 
@@ -243,8 +244,9 @@ class Utils:
         # Triangulate 3D points
         pts3D = Utils.ToEuclidean(Utils.TriangulatePoints(P1, P2, pts1, pts2))
 
-        # Mask indicating that a 3D point is "good"
-        good  = np.zeros(N)
+        num_good   = 0
+        good       = np.zeros(N)
+        parallaxes = []
 
         # We go over matches
         for i in range(N):
@@ -257,13 +259,57 @@ class Utils:
             if not np.isfinite(point3D).all():
                 continue
 
-        # - Parallax check
-        # - Depth check (both cameras)
-        # - Reprojection error check (both cameras)
-        # - Store 3D points
+            # Compute parallax
+            normal1 = point3D - O1
+            distan1 = np.linalg.norm(normal1)
+
+            normal2 = point3D - O2
+            distan2 = np.linalg.norm(normal2)
+
+            cos_parallax = np.dot(normal1, normal2) / (distan1 * distan2)
+
+            # Under sufficient parallax, if the triangulated point has negative depth w.r.t. any camera, we ignore it
+            point3DCamera1 = point3D
+            point3DCamera2 = R @ point3D + t
+
+            if cos_parallax < 0.99998 and point3DCamera1[2] <= 0:
+                continue
+
+            if cos_parallax < 0.99998 and point3DCamera2[2] <= 0:
+                continue
+
+            # If the reprojection error surpasses a given threshold for any camera, we ignore the point correspondence
+            threshold = 4 * (sigma ** 2)
+
+            point2DCamera1 = Utils.ToEuclidean(np.array([P1 @ point3D]))[0]
+            squared_error_1  = np.linalg.norm(point2DCamera1 - pts1[i]) ** 2
+            if squared_error_1 > threshold:
+                continue
+
+            point2DCamera2 = Utils.ToEuclidean(np.array([P2 @ point3D]))[0]
+            squared_error_2  = np.linalg.norm(point2DCamera2 - pts2[i]) ** 2
+            if squared_error_2 > threshold:
+                continue
+
+            # Indicates sufficient parallax
+            if cos_parallax < 0.99998:
+                good[i] = True
+
+            # Store quantities
+            num_good += 1
+            parallaxes.append(cos_parallax)
+
+        if num_good > 0:
+            parallaxes.sort()
+            index = min(50, len(parallaxes) - 1)
+            ang_parallax = math.acos(parallaxes[index]) * (180/np.pi)
+        else:
+            ang_parallax = 0
+
+        return pts3D, num_good, good, ang_parallax
 
     @staticmethod
-    def ReconstructWithF(K, F, pts1, pts2, inlier):
+    def ReconstructWithF(K, F, pts1, pts2, inlier, sigma):
         # Compute essential matrix
         E = K.T @ F @ K
 
@@ -271,4 +317,4 @@ class Utils:
         Rs, ts = Utils.DecomposeEssentialMatrix(E)
 
         # Reconstruct with all four hypotheses
-        Utils.CheckRT(K, Rs[0], ts[0], pts1, pts2, inlier)
+        Utils.CheckRT(K, Rs[0], ts[0], pts1, pts2, inlier, sigma)

@@ -40,4 +40,4 @@ class Initializer:
 
         # Compute fundamental matrix via normalized 8-point algorithm and RANSAC
         F, score, inlier = Utils.EstimateFundamentalMatrixRANSAC(pts1, pts2, self.iterations, self.sigma, debug=True)
-        Utils.ReconstructWithF(initial_frame.K, F, pts1, pts2, inlier)
+        Utils.ReconstructWithF(initial_frame.K, F, pts1, pts2, inlier, self.sigma)
