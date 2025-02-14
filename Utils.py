@@ -226,22 +226,37 @@ class Utils:
         # Construct projection matrix (initial frame) P1 = K[I | 0]
         P1 = np.hstack((K, np.zeros([3, 1])))
 
-        # Construct projection matrix (current frame) P2 = K[R | t]
+        # Construct projection matrix (current frame) P2 = KR[I | -C] = K[R | -RC] = K[R | t]
         t = t[:, np.newaxis]
         Rt = np.hstack((R, t))
         P2 = K @ Rt
 
+        # Get optical center (initial frame) w.r.t. world coordinates
+        O1 = np.zeros(3)
+
+        # Get optical center (current frame) w.r.t. world coordinates
+        O2 = -R.T @ t
+
+        # Get the number of point correspondences
+        N = inlier.shape[0]
+
         # Triangulate 3D points
         pts3D = Utils.ToEuclidean(Utils.TriangulatePoints(P1, P2, pts1, pts2))
 
+        # Mask indicating that a 3D point is "good"
+        good  = np.zeros(N)
+
         # We go over matches
-        N = inlier.shape[0]
         for i in range(N):
             # If the point correspondence is not an inlier, we ignore it
             if not inlier[i]:
                 continue
 
-        # - . . .
+            # If the triangulated point is not located at a finite location, we ignore it
+            point3D = pts3D[i]
+            if not np.isfinite(point3D).all():
+                continue
+
         # - Parallax check
         # - Depth check (both cameras)
         # - Reprojection error check (both cameras)
