@@ -49,14 +49,8 @@ class Utils:
 
     @staticmethod
     def ToHomogeneous(pts):
-        # pts is an np.array of shape (N, 2)
-        pts_hom = []
-
-        for point in pts:
-            x, y = point[0], point[1]
-            pts_hom.append(np.array([x, y, 1]))
-
-        return np.asarray(pts_hom)
+        # pts is an np.array of shape (N, D)
+        return np.asarray([np.append(point, [1]) for point in pts])
 
     @staticmethod
     def ToEuclidean(pts):
@@ -237,6 +231,7 @@ class Utils:
 
         # Get optical center (current frame) w.r.t. world coordinates
         O2 = -R.T @ t
+        O2 = O2.flatten()
 
         # Get the number of point correspondences
         N = inlier.shape[0]
@@ -281,12 +276,14 @@ class Utils:
             # If the reprojection error surpasses a given threshold for any camera, we ignore the point correspondence
             threshold = 4 * (sigma ** 2)
 
-            point2DCamera1 = Utils.ToEuclidean(np.array([P1 @ point3D]))[0]
+            point3D_hom = Utils.ToHomogeneous(np.array([point3D]))[0]
+
+            point2DCamera1 = Utils.ToEuclidean(np.array([P1 @ point3D_hom]))[0]
             squared_error_1  = np.linalg.norm(point2DCamera1 - pts1[i]) ** 2
             if squared_error_1 > threshold:
                 continue
 
-            point2DCamera2 = Utils.ToEuclidean(np.array([P2 @ point3D]))[0]
+            point2DCamera2 = Utils.ToEuclidean(np.array([P2 @ point3D_hom]))[0]
             squared_error_2  = np.linalg.norm(point2DCamera2 - pts2[i]) ** 2
             if squared_error_2 > threshold:
                 continue
