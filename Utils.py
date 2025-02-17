@@ -284,14 +284,14 @@ class Utils:
             # If the reprojection error surpasses a given threshold for any camera, we ignore the point correspondence
             threshold = 4 * (sigma ** 2)
 
-            point3D_hom = Utils.ToHomogeneous(np.array([point3D]))[0]
+            point3D_hom = Utils.ToHomogeneous(point3D)
 
-            point2DCamera1 = Utils.ToEuclidean(np.array([P1 @ point3D_hom]))[0]
+            point2DCamera1 = Utils.ToEuclidean(P1 @ point3D_hom)
             squared_error_1  = np.linalg.norm(point2DCamera1 - pts1[i]) ** 2
             if squared_error_1 > threshold:
                 continue
 
-            point2DCamera2 = Utils.ToEuclidean(np.array([P2 @ point3D_hom]))[0]
+            point2DCamera2 = Utils.ToEuclidean(P2 @ point3D_hom)
             squared_error_2  = np.linalg.norm(point2DCamera2 - pts2[i]) ** 2
             if squared_error_2 > threshold:
                 continue
