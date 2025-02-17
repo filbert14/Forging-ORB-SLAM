@@ -49,11 +49,21 @@ class Utils:
 
     @staticmethod
     def ToHomogeneous(pts):
+        # pts is a single point of shape (D,)
+        if len(pts.shape) == 1:
+            point = pts
+            return np.append(point, [1])
+
         # pts is an np.array of shape (N, D)
         return np.asarray([np.append(point, [1]) for point in pts])
 
     @staticmethod
     def ToEuclidean(pts):
+        # pts is a single point of shape (D,)
+        if len(pts.shape) == 1:
+            point = pts
+            return point[:-1] / point[-1]
+
         # pts is an np.array of shape (N, D)
         return np.asarray([np.array(point[:-1] / point[-1]) for point in pts])
 
