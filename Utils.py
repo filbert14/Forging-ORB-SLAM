@@ -219,11 +219,10 @@ class Utils:
     @staticmethod
     def CheckRT(K, R, t, pts1, pts2, inlier, sigma):
         # Construct projection matrix (initial frame) P1 = K[I | 0]
-        P1 = np.hstack((K, np.zeros([3, 1])))
+        P1 = np.hstack((K, np.zeros([3])[:, np.newaxis]))
 
         # Construct projection matrix (current frame) P2 = KR[I | -C] = K[R | -RC] = K[R | t]
-        t = t[:, np.newaxis]
-        Rt = np.hstack((R, t))
+        Rt = np.hstack((R, t[:, np.newaxis]))
         P2 = K @ Rt
 
         # Get optical center (initial frame) w.r.t. world coordinates
@@ -231,7 +230,6 @@ class Utils:
 
         # Get optical center (current frame) w.r.t. world coordinates
         O2 = -R.T @ t
-        O2 = O2.flatten()
 
         # Get the number of point correspondences
         N = inlier.shape[0]
