@@ -296,19 +296,21 @@ class Utils:
             if squared_error_2 > threshold:
                 continue
 
-            # Indicates sufficient parallax
-            if cos_parallax < 0.99998:
-                good[i] = True
-
-            # Store quantities
+            # If the point correspondence / triangulated 3D point passes the tests, they are considered good
             num_good += 1
             parallaxes.append(cos_parallax)
 
+            # We additionally keep track of those with sufficient parallax
+            if cos_parallax < 0.99998:
+                good[i] = True
+
         if num_good > 0:
+            # If we have good point correspondences, take the 50th smallest value as the representative parallax angle
             parallaxes.sort()
             index = min(50, len(parallaxes) - 1)
             ang_parallax = math.acos(parallaxes[index]) * (180/np.pi)
         else:
+            # Otherwise we assume zero parallax angle (both cameras are completely aligned)
             ang_parallax = 0
 
         return pts3D, num_good, good, ang_parallax
