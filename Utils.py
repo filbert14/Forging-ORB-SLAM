@@ -353,4 +353,4 @@ class Utils:
 
         # Return the best pose and 3D points
         if ang_parallax_all[max_good_ind] > min_parallax:
-            return True, (Rs[max_good_ind], ts[max_good_ind], pts_3D_all[max_good_ind], good_all[max_good_ind])
+            return True, np.array([Rs[max_good_ind], ts[max_good_ind], pts_3D_all[max_good_ind], good_all[max_good_ind]])
