@@ -316,7 +316,7 @@ class Utils:
         return pts3D, num_good, good, ang_parallax
 
     @staticmethod
-    def ReconstructWithF(K, F, pts1, pts2, inlier, sigma):
+    def ReconstructWithF(K, F, pts1, pts2, inlier, sigma, min_parallax, min_triangulated):
         # Compute essential matrix
         E = K.T @ F @ K
 
@@ -324,4 +324,33 @@ class Utils:
         Rs, ts = Utils.DecomposeEssentialMatrix(E)
 
         # Reconstruct with all four hypotheses
-        Utils.CheckRT(K, Rs[0], ts[0], pts1, pts2, inlier, sigma)
+        pts_3D_0, num_good_0, good_0, ang_parallax_0 = Utils.CheckRT(K, Rs[0], ts[0], pts1, pts2, inlier, sigma)
+        pts_3D_1, num_good_1, good_1, ang_parallax_1 = Utils.CheckRT(K, Rs[1], ts[1], pts1, pts2, inlier, sigma)
+        pts_3D_2, num_good_2, good_2, ang_parallax_2 = Utils.CheckRT(K, Rs[2], ts[2], pts1, pts2, inlier, sigma)
+        pts_3D_3, num_good_3, good_3, ang_parallax_3 = Utils.CheckRT(K, Rs[3], ts[3], pts1, pts2, inlier, sigma)
+
+        pts_3D_all       = np.array([pts_3D_0,       pts_3D_1,       pts_3D_2,       pts_3D_3])
+        num_good_all     = np.array([num_good_0,     num_good_1,     num_good_2,     num_good_3])
+        good_all         = np.array([good_0,         good_1,         good_2,         good_3])
+        ang_parallax_all = np.array([ang_parallax_0, ang_parallax_1, ang_parallax_2, ang_parallax_3])
+
+        # Determine pose (R, t) which results in the maximum number of good points
+        max_good, max_good_ind = num_good_all.max(), num_good_all.argmax()
+
+        # Determine the minimum number of good points
+        num_min_good = max(0.9 * inlier.sum(), min_triangulated)
+
+        # Determine number of similar poses (those which result in a similar amount of good points)
+        num_similar = 0
+        m = lambda ng : ng > 0.7 * max_good
+        for num_good in num_good_all:
+            if m(num_good): num_similar += 1
+
+        # If the maximum number of good points following the reconstruction is smaller than the minimum required
+        # number of points, or when the best estimated pose is not unique, we reject initialization
+        if(max_good < num_min_good or not num_similar == 1):
+            return False, None
+
+        # Return the best pose and 3D points
+        if ang_parallax_all[max_good_ind] > min_parallax:
+            return True, (Rs[max_good_ind], ts[max_good_ind], pts_3D_all[max_good_ind], good_all[max_good_ind])
